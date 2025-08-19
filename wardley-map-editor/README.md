@@ -2,10 +2,6 @@
 
 A modern, interactive Wardley Map editor built with React and TypeScript. Create strategic maps with intuitive drag-and-drop functionality and export to multiple formats.
 
-## 🚀 Live Demo
-
-**[Try it now!](https://mrsimpson.github.io/demo-responsible-vibe-wardley/)**
-
 ## ✨ Features
 
 ### 🎯 **Core Functionality**
@@ -40,7 +36,6 @@ A modern, interactive Wardley Map editor built with React and TypeScript. Create
 
 ### Setup
 ```bash
-cd wardley-map-editor
 npm install
 npm run dev
 ```
@@ -50,10 +45,11 @@ npm run dev
 npm run build
 ```
 
-### Deploy
-```bash
-npm run deploy
-```
+### Scripts
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run preview` - Preview production build
 
 ## 🏗️ Architecture
 
@@ -78,13 +74,31 @@ npm run deploy
 - **Components**: The things that make up your system
 - **Dependencies**: How components depend on each other
 
-## 🚀 Deployment
+## 📝 Technical Details
 
-This project automatically deploys to GitHub Pages via GitHub Actions on every push to main.
+### Component Structure
+```
+src/
+├── components/          # React components
+│   ├── Canvas.tsx      # Main SVG canvas
+│   ├── Toolbar.tsx     # Component palette
+│   └── PropertyPanel.tsx # Component editor
+├── stores/             # Zustand state management
+├── utils/              # Export and utility functions
+└── types/              # TypeScript definitions
+```
 
-## 📝 License
+### State Management
+- **Zustand store** for global state
+- **Component state**: positions, properties, connections
+- **UI state**: selections, modal visibility
+- **Export state**: format options and data preparation
 
-MIT License - feel free to use and modify!
+### Export System
+- **PDF**: Uses jsPDF with SVG rendering
+- **PNG**: Uses html2canvas for image capture
+- **Draw.io**: Generates XML with precise coordinate mapping
+- **JSON**: Serializes complete map state
 
 ---
 
