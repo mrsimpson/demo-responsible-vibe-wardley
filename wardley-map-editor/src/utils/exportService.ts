@@ -215,36 +215,106 @@ export class ExportService {
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
         
-        <!-- Evolution Axis -->
+        <!-- Evolution Axis Background Stages -->
+        <mxCell id="genesis-bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=none;opacity=30" vertex="1" parent="1">
+          <mxGeometry x="100" y="100" width="200" height="600" as="geometry"/>
+        </mxCell>
+        <mxCell id="custom-bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DDD6FE;strokeColor=none;opacity=30" vertex="1" parent="1">
+          <mxGeometry x="300" y="100" width="200" height="600" as="geometry"/>
+        </mxCell>
+        <mxCell id="product-bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=none;opacity=30" vertex="1" parent="1">
+          <mxGeometry x="500" y="100" width="200" height="600" as="geometry"/>
+        </mxCell>
+        <mxCell id="commodity-bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=none;opacity=30" vertex="1" parent="1">
+          <mxGeometry x="700" y="100" width="200" height="600" as="geometry"/>
+        </mxCell>
+        
+        <!-- Evolution Axis Line -->
+        <mxCell id="evolution-line" value="" style="endArrow=none;html=1;strokeColor=#374151;strokeWidth=3" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="100" y="720" as="sourcePoint"/>
+            <mxPoint x="900" y="720" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Value Chain Axis Line -->
+        <mxCell id="value-chain-line" value="" style="endArrow=none;html=1;strokeColor=#374151;strokeWidth=3" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="100" y="100" as="sourcePoint"/>
+            <mxPoint x="100" y="720" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Grid Lines -->
+        <mxCell id="grid-v1" value="" style="endArrow=none;html=1;strokeColor=#E5E7EB;strokeWidth=1;opacity=50" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="300" y="100" as="sourcePoint"/>
+            <mxPoint x="300" y="720" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="grid-v2" value="" style="endArrow=none;html=1;strokeColor=#E5E7EB;strokeWidth=1;opacity=50" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="100" as="sourcePoint"/>
+            <mxPoint x="500" y="720" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="grid-v3" value="" style="endArrow=none;html=1;strokeColor=#E5E7EB;strokeWidth=1;opacity=50" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="700" y="100" as="sourcePoint"/>
+            <mxPoint x="700" y="720" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Horizontal Grid Lines -->
+        <mxCell id="grid-h1" value="" style="endArrow=none;html=1;strokeColor=#E5E7EB;strokeWidth=1;opacity=30" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="100" y="250" as="sourcePoint"/>
+            <mxPoint x="900" y="250" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="grid-h2" value="" style="endArrow=none;html=1;strokeColor=#E5E7EB;strokeWidth=1;opacity=30" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="100" y="400" as="sourcePoint"/>
+            <mxPoint x="900" y="400" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="grid-h3" value="" style="endArrow=none;html=1;strokeColor=#E5E7EB;strokeWidth=1;opacity=30" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="100" y="550" as="sourcePoint"/>
+            <mxPoint x="900" y="550" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Evolution Axis Title -->
         <mxCell id="evolution-axis" value="Evolution" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="500" y="750" width="200" height="30" as="geometry"/>
+          <mxGeometry x="450" y="750" width="100" height="30" as="geometry"/>
         </mxCell>
         
-        <!-- Value Chain Axis -->
+        <!-- Value Chain Axis Title -->
         <mxCell id="value-chain-axis" value="Value Chain" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;rotation=-90" vertex="1" parent="1">
-          <mxGeometry x="20" y="350" width="100" height="30" as="geometry"/>
+          <mxGeometry x="20" y="360" width="100" height="30" as="geometry"/>
         </mxCell>
         
-        <!-- Evolution Labels -->
-        <mxCell id="genesis-label" value="Genesis" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12" vertex="1" parent="1">
-          <mxGeometry x="150" y="720" width="60" height="20" as="geometry"/>
+        <!-- Evolution Stage Labels -->
+        <mxCell id="genesis-label" value="Genesis" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="170" y="730" width="60" height="20" as="geometry"/>
         </mxCell>
-        <mxCell id="custom-label" value="Custom" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12" vertex="1" parent="1">
-          <mxGeometry x="350" y="720" width="60" height="20" as="geometry"/>
+        <mxCell id="custom-label" value="Custom" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="370" y="730" width="60" height="20" as="geometry"/>
         </mxCell>
-        <mxCell id="product-label" value="Product" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12" vertex="1" parent="1">
-          <mxGeometry x="550" y="720" width="60" height="20" as="geometry"/>
+        <mxCell id="product-label" value="Product" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="570" y="730" width="60" height="20" as="geometry"/>
         </mxCell>
-        <mxCell id="commodity-label" value="Commodity" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12" vertex="1" parent="1">
-          <mxGeometry x="750" y="720" width="80" height="20" as="geometry"/>
+        <mxCell id="commodity-label" value="Commodity" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="770" y="730" width="80" height="20" as="geometry"/>
         </mxCell>
         
         <!-- Value Chain Labels -->
-        <mxCell id="visible-label" value="Visible" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12" vertex="1" parent="1">
-          <mxGeometry x="60" y="110" width="60" height="20" as="geometry"/>
+        <mxCell id="visible-label" value="Visible" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="110" width="60" height="20" as="geometry"/>
         </mxCell>
-        <mxCell id="invisible-label" value="Invisible" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12" vertex="1" parent="1">
-          <mxGeometry x="60" y="680" width="60" height="20" as="geometry"/>
+        <mxCell id="invisible-label" value="Invisible" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="690" width="60" height="20" as="geometry"/>
         </mxCell>
         
         ${components}

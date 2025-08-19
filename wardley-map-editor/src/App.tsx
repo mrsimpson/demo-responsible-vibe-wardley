@@ -3,10 +3,63 @@ import Canvas from './components/Canvas'
 import Toolbar from './components/Toolbar'
 import PropertyPanel from './components/PropertyPanel'
 import ExportModal from './components/ExportModal'
+import { ExportService } from './utils/exportService'
+import { useMapStore } from './stores/mapStore'
 
 function App() {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [exportStatus, setExportStatus] = useState<string>('')
   const canvasRef = useRef<SVGSVGElement>(null)
+  const { components, connections } = useMapStore()
+
+  const createExportData = () => ({
+    components,
+    connections,
+    metadata: {
+      title: 'Wardley Map',
+      createdAt: new Date().toISOString(),
+      exportedAt: new Date().toISOString(),
+      version: '1.0'
+    }
+  })
+
+  const handleDirectExport = async (format: 'pdf' | 'drawio') => {
+    if (!canvasRef.current) {
+      setExportStatus('Error: Canvas not available')
+      return
+    }
+
+    setExportStatus(`Exporting as ${format.toUpperCase()}...`)
+
+    try {
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-')
+      const filename = `wardley-map-${timestamp}`
+      
+      let success = false
+      const exportData = createExportData()
+
+      switch (format) {
+        case 'pdf':
+          success = await ExportService.exportToPDF(canvasRef.current, `${filename}.pdf`)
+          break
+        case 'drawio':
+          success = ExportService.exportToDrawIO(exportData, `${filename}.drawio`)
+          break
+      }
+
+      if (success) {
+        setExportStatus(`Successfully exported as ${format.toUpperCase()}!`)
+        setTimeout(() => setExportStatus(''), 3000)
+      } else {
+        setExportStatus(`Failed to export as ${format.toUpperCase()}`)
+        setTimeout(() => setExportStatus(''), 3000)
+      }
+    } catch (error) {
+      console.error('Export error:', error)
+      setExportStatus('Export failed. Please try again.')
+      setTimeout(() => setExportStatus(''), 3000)
+    }
+  }
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#f3f4f6' }}>
@@ -24,7 +77,7 @@ function App() {
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <button 
-              onClick={() => setIsExportModalOpen(true)}
+              onClick={() => handleDirectExport('pdf')}
               style={{ 
                 padding: '0.5rem 1rem', 
                 fontSize: '0.875rem', 
@@ -47,7 +100,7 @@ function App() {
               📄 Export PDF
             </button>
             <button 
-              onClick={() => setIsExportModalOpen(true)}
+              onClick={() => handleDirectExport('drawio')}
               style={{ 
                 padding: '0.5rem 1rem', 
                 fontSize: '0.875rem', 
@@ -88,10 +141,25 @@ function App() {
                 e.currentTarget.style.backgroundColor = '#2563eb'
               }}
             >
-              💾 Export & Import
+              💾 More Options
             </button>
           </div>
         </div>
+        
+        {/* Export Status */}
+        {exportStatus && (
+          <div style={{
+            marginTop: '0.5rem',
+            padding: '0.5rem 1rem',
+            backgroundColor: exportStatus.includes('Error') || exportStatus.includes('Failed') ? '#fef2f2' : '#f0f9ff',
+            border: `1px solid ${exportStatus.includes('Error') || exportStatus.includes('Failed') ? '#fecaca' : '#bae6fd'}`,
+            borderRadius: '0.375rem',
+            color: exportStatus.includes('Error') || exportStatus.includes('Failed') ? '#dc2626' : '#0369a1',
+            fontSize: '0.875rem'
+          }}>
+            {exportStatus}
+          </div>
+        )}
       </header>
 
       {/* Main content */}

@@ -24,7 +24,6 @@ export interface MapState {
   connections: MapConnection[]
   selectedId: string | null
   selectedConnectionId: string | null
-  isDragging: boolean
   isConnecting: boolean
   connectionStart: string | null // Component ID for connection start
 }
@@ -50,11 +49,6 @@ interface MapStore extends MapState {
   completeConnection: (toComponentId: string) => void
   cancelConnection: () => void
   
-  // Drag actions
-  startDrag: (componentId: string) => void
-  updateDrag: (id: string, x: number, y: number) => void
-  endDrag: () => void
-  
   // Utility
   clearMap: () => void
   getComponentById: (id: string) => MapComponent | undefined
@@ -68,7 +62,6 @@ export const useMapStore = create<MapStore>((set, get) => ({
   connections: [],
   selectedId: null,
   selectedConnectionId: null,
-  isDragging: false,
   isConnecting: false,
   connectionStart: null,
   
@@ -186,29 +179,6 @@ export const useMapStore = create<MapStore>((set, get) => ({
     })
   },
   
-  // Drag actions
-  startDrag: (componentId) => {
-    set({
-      isDragging: true,
-      selectedId: componentId,
-      selectedConnectionId: null,
-      isConnecting: false,
-      connectionStart: null
-    })
-  },
-  
-  updateDrag: (id, x, y) => {
-    // Constrain to canvas bounds (0-1)
-    const constrainedX = Math.max(0, Math.min(1, x))
-    const constrainedY = Math.max(0, Math.min(1, y))
-    
-    get().updateComponent(id, { x: constrainedX, y: constrainedY })
-  },
-  
-  endDrag: () => {
-    set({ isDragging: false })
-  },
-  
   // Utility actions
   clearMap: () => {
     set({
@@ -216,7 +186,6 @@ export const useMapStore = create<MapStore>((set, get) => ({
       connections: [],
       selectedId: null,
       selectedConnectionId: null,
-      isDragging: false,
       isConnecting: false,
       connectionStart: null
     })
