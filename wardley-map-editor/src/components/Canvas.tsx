@@ -26,12 +26,21 @@ const Canvas = forwardRef<SVGSVGElement>((props, ref) => {
     if (!svgRef.current) return { x: 0, y: 0 }
     
     const rect = svgRef.current.getBoundingClientRect()
-    const x = (clientX - rect.left) / rect.width
-    const y = (clientY - rect.top - 50) / 500 // Account for axis offset and canvas height
+    
+    // Calculate X coordinate (Evolution: 0-1 across canvas width)
+    // SVG viewBox is now "-80 0 1080 600", so canvas area is from x=0 to x=1000 (1000 units wide)
+    // Screen coordinates need to be mapped to this range
+    const svgX = ((clientX - rect.left) / rect.width) * 1080 - 80 // Convert to SVG coordinates
+    const canvasX = svgX / 1000 // Map to canvas area (0-1000 becomes 0-1)
+    
+    // Calculate Y coordinate (Value Chain: 0-1 from top to bottom)
+    // SVG viewBox is 600 units tall, but canvas area is from y=50 to y=550 (500 units)
+    const svgY = ((clientY - rect.top) / rect.height) * 600 // Convert to SVG coordinates
+    const canvasY = (svgY - 50) / 500 // Map to canvas area (50-550 becomes 0-1)
     
     return {
-      x: Math.max(0, Math.min(1, x)),
-      y: Math.max(0, Math.min(1, y))
+      x: Math.max(0, Math.min(1, canvasX)),
+      y: Math.max(0, Math.min(1, canvasY))
     }
   }, [])
 
@@ -67,19 +76,27 @@ const Canvas = forwardRef<SVGSVGElement>((props, ref) => {
     
     selectComponent(componentId)
     
-    const startCoords = screenToMapCoords(event.clientX, event.clientY)
     const component = components.find(c => c.id === componentId)
     if (!component) return
     
+    // Calculate initial offset between mouse and component center
+    const startCoords = screenToMapCoords(event.clientX, event.clientY)
     const offsetX = startCoords.x - component.x
     const offsetY = startCoords.y - component.y
     
     const handleMouseMove = (e: MouseEvent) => {
+      // Get current mouse position in map coordinates
       const currentCoords = screenToMapCoords(e.clientX, e.clientY)
-      const newX = Math.max(0, Math.min(1, currentCoords.x - offsetX))
-      const newY = Math.max(0, Math.min(1, currentCoords.y - offsetY))
       
-      updateComponent(componentId, { x: newX, y: newY })
+      // Calculate new component position by subtracting the offset
+      const newX = currentCoords.x - offsetX
+      const newY = currentCoords.y - offsetY
+      
+      // Apply constraints to keep component within bounds
+      const constrainedX = Math.max(0, Math.min(1, newX))
+      const constrainedY = Math.max(0, Math.min(1, newY))
+      
+      updateComponent(componentId, { x: constrainedX, y: constrainedY })
     }
     
     const handleMouseUp = () => {
@@ -117,7 +134,7 @@ const Canvas = forwardRef<SVGSVGElement>((props, ref) => {
         ref={svgRef}
         width="100%"
         height="100%"
-        viewBox="0 0 1000 600"
+        viewBox="-80 0 1080 600"
         style={{ 
           border: '1px solid #d1d5db', 
           cursor: 'default',
@@ -150,13 +167,13 @@ const Canvas = forwardRef<SVGSVGElement>((props, ref) => {
 
         {/* Evolution Axis */}
         <g>
-          {/* Stage backgrounds */}
+          {/* Stage backgrounds - start from x=0 to align with Genesis */}
           <rect x="0" y="50" width="250" height="500" fill="#fef3c7" opacity="0.2" />
           <rect x="250" y="50" width="250" height="500" fill="#ddd6fe" opacity="0.2" />
           <rect x="500" y="50" width="250" height="500" fill="#dcfce7" opacity="0.2" />
           <rect x="750" y="50" width="250" height="500" fill="#fee2e2" opacity="0.2" />
           
-          {/* Main axis line */}
+          {/* Main axis line - horizontal at bottom starting from x=0 */}
           <line x1="0" y1="550" x2="1000" y2="550" stroke="#374151" strokeWidth="2" />
           
           {/* Stage labels */}
@@ -186,26 +203,26 @@ const Canvas = forwardRef<SVGSVGElement>((props, ref) => {
 
         {/* Value Chain Axis */}
         <g>
-          {/* Main axis line */}
-          <line x1="50" y1="50" x2="50" y2="550" stroke="#374151" strokeWidth="2" />
+          {/* Main axis line - vertical from top to bottom at x=0 (Genesis position) */}
+          <line x1="0" y1="50" x2="0" y2="550" stroke="#374151" strokeWidth="2" />
           
-          {/* Grid lines */}
-          <line x1="50" y1="50" x2="1000" y2="50" stroke="#e5e7eb" strokeWidth="1" opacity="0.5" />
-          <line x1="50" y1="175" x2="1000" y2="175" stroke="#e5e7eb" strokeWidth="1" opacity="0.3" />
-          <line x1="50" y1="300" x2="1000" y2="300" stroke="#e5e7eb" strokeWidth="1" opacity="0.3" />
-          <line x1="50" y1="425" x2="1000" y2="425" stroke="#e5e7eb" strokeWidth="1" opacity="0.3" />
-          <line x1="50" y1="550" x2="1000" y2="550" stroke="#e5e7eb" strokeWidth="1" opacity="0.5" />
+          {/* Grid lines - horizontal reference lines */}
+          <line x1="0" y1="50" x2="1000" y2="50" stroke="#e5e7eb" strokeWidth="1" opacity="0.5" />
+          <line x1="0" y1="175" x2="1000" y2="175" stroke="#e5e7eb" strokeWidth="1" opacity="0.3" />
+          <line x1="0" y1="300" x2="1000" y2="300" stroke="#e5e7eb" strokeWidth="1" opacity="0.3" />
+          <line x1="0" y1="425" x2="1000" y2="425" stroke="#e5e7eb" strokeWidth="1" opacity="0.3" />
+          <line x1="0" y1="550" x2="1000" y2="550" stroke="#e5e7eb" strokeWidth="1" opacity="0.5" />
           
-          {/* Labels */}
-          <text x="35" y="55" textAnchor="end" fill="#374151" fontSize="14" fontWeight="500">
+          {/* Labels - positioned in the left padding area */}
+          <text x="-15" y="55" textAnchor="end" fill="#374151" fontSize="14" fontWeight="500">
             Visible
           </text>
-          <text x="35" y="555" textAnchor="end" fill="#374151" fontSize="14" fontWeight="500">
+          <text x="-15" y="555" textAnchor="end" fill="#374151" fontSize="14" fontWeight="500">
             Invisible
           </text>
           
-          {/* Axis title (rotated) */}
-          <text x="20" y="300" textAnchor="middle" fill="#1f2937" fontSize="16" fontWeight="600" transform="rotate(-90, 20, 300)">
+          {/* Axis title (rotated) - positioned in the left padding area */}
+          <text x="-50" y="300" textAnchor="middle" fill="#1f2937" fontSize="16" fontWeight="600" transform="rotate(-90, -50, 300)">
             Value Chain
           </text>
         </g>

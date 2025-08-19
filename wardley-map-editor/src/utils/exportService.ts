@@ -179,14 +179,24 @@ export class ExportService {
   // Generate Draw.io XML format
   private static generateDrawIOXML(data: ExportData): string {
     const components = data.components.map((component, index) => {
-      const x = component.x * 800 + 100 // Scale to draw.io coordinates
-      const y = component.y * 600 + 100
+      // Scale to draw.io coordinates with proper centering
+      // Web canvas: evolution 0-1 maps to x=0-1000, value chain 0-1 maps to y=50-550
+      // Draw.io: we need to map this to the coordinate system with left padding
+      const x = component.x * 800 + 100 // Evolution: 0-1 becomes 100-900 in draw.io
+      const y = component.y * 600 + 100 // Value chain: 0-1 becomes 100-700 in draw.io
+      
+      // For draw.io, we need to position the ellipse so its center aligns with our circle center
+      // draw.io ellipse geometry is positioned by top-left corner, so we offset by half width/height
+      const width = 80
+      const height = 50
+      const centerX = x - (width / 2)  // Offset to center the ellipse
+      const centerY = y - (height / 2) // Offset to center the ellipse
       
       return `
         <mxCell id="component-${component.id}" value="${this.escapeXML(component.name)}" 
-                style="ellipse;whiteSpace=wrap;html=1;fillColor=${component.color};strokeColor=#000000;fontColor=#FFFFFF;fontSize=12;fontStyle=1" 
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=${component.color};strokeColor=#000000;fontColor=#FFFFFF;fontSize=12;fontStyle=1;aspect=fixed" 
                 vertex="1" parent="1">
-          <mxGeometry x="${x}" y="${y}" width="80" height="50" as="geometry"/>
+          <mxGeometry x="${centerX}" y="${centerY}" width="${width}" height="${height}" as="geometry"/>
         </mxCell>`
     }).join('')
 
@@ -201,7 +211,7 @@ export class ExportService {
       
       return `
         <mxCell id="connection-${connection.id}" value="${this.escapeXML(connection.label || '')}" 
-                style="endArrow=classic;html=1;strokeColor=${strokeColor};${strokeStyle}fontSize=10" 
+                style="endArrow=classic;html=1;strokeColor=${strokeColor};${strokeStyle}fontSize=10;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0" 
                 edge="1" parent="1" source="component-${connection.fromId}" target="component-${connection.toId}">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>`
@@ -232,16 +242,16 @@ export class ExportService {
         <!-- Evolution Axis Line -->
         <mxCell id="evolution-line" value="" style="endArrow=none;html=1;strokeColor=#374151;strokeWidth=3" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="100" y="720" as="sourcePoint"/>
-            <mxPoint x="900" y="720" as="targetPoint"/>
+            <mxPoint x="100" y="700" as="sourcePoint"/>
+            <mxPoint x="900" y="700" as="targetPoint"/>
           </mxGeometry>
         </mxCell>
         
-        <!-- Value Chain Axis Line -->
+        <!-- Value Chain Axis Line - positioned at Genesis (x=100) -->
         <mxCell id="value-chain-line" value="" style="endArrow=none;html=1;strokeColor=#374151;strokeWidth=3" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="100" y="100" as="sourcePoint"/>
-            <mxPoint x="100" y="720" as="targetPoint"/>
+            <mxPoint x="100" y="700" as="targetPoint"/>
           </mxGeometry>
         </mxCell>
         
@@ -249,19 +259,19 @@ export class ExportService {
         <mxCell id="grid-v1" value="" style="endArrow=none;html=1;strokeColor=#E5E7EB;strokeWidth=1;opacity=50" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="300" y="100" as="sourcePoint"/>
-            <mxPoint x="300" y="720" as="targetPoint"/>
+            <mxPoint x="300" y="700" as="targetPoint"/>
           </mxGeometry>
         </mxCell>
         <mxCell id="grid-v2" value="" style="endArrow=none;html=1;strokeColor=#E5E7EB;strokeWidth=1;opacity=50" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="500" y="100" as="sourcePoint"/>
-            <mxPoint x="500" y="720" as="targetPoint"/>
+            <mxPoint x="500" y="700" as="targetPoint"/>
           </mxGeometry>
         </mxCell>
         <mxCell id="grid-v3" value="" style="endArrow=none;html=1;strokeColor=#E5E7EB;strokeWidth=1;opacity=50" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="700" y="100" as="sourcePoint"/>
-            <mxPoint x="700" y="720" as="targetPoint"/>
+            <mxPoint x="700" y="700" as="targetPoint"/>
           </mxGeometry>
         </mxCell>
         
@@ -287,7 +297,7 @@ export class ExportService {
         
         <!-- Evolution Axis Title -->
         <mxCell id="evolution-axis" value="Evolution" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="450" y="750" width="100" height="30" as="geometry"/>
+          <mxGeometry x="450" y="730" width="100" height="30" as="geometry"/>
         </mxCell>
         
         <!-- Value Chain Axis Title -->
@@ -297,21 +307,21 @@ export class ExportService {
         
         <!-- Evolution Stage Labels -->
         <mxCell id="genesis-label" value="Genesis" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="170" y="730" width="60" height="20" as="geometry"/>
+          <mxGeometry x="170" y="710" width="60" height="20" as="geometry"/>
         </mxCell>
         <mxCell id="custom-label" value="Custom" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="370" y="730" width="60" height="20" as="geometry"/>
+          <mxGeometry x="370" y="710" width="60" height="20" as="geometry"/>
         </mxCell>
         <mxCell id="product-label" value="Product" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="570" y="730" width="60" height="20" as="geometry"/>
+          <mxGeometry x="570" y="710" width="60" height="20" as="geometry"/>
         </mxCell>
         <mxCell id="commodity-label" value="Commodity" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="770" y="730" width="80" height="20" as="geometry"/>
+          <mxGeometry x="770" y="710" width="80" height="20" as="geometry"/>
         </mxCell>
         
         <!-- Value Chain Labels -->
         <mxCell id="visible-label" value="Visible" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="40" y="110" width="60" height="20" as="geometry"/>
+          <mxGeometry x="40" y="90" width="60" height="20" as="geometry"/>
         </mxCell>
         <mxCell id="invisible-label" value="Invisible" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
           <mxGeometry x="40" y="690" width="60" height="20" as="geometry"/>
