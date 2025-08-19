@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useState, useEffect } from 'react'
+import React, { useRef, useCallback, useState, useEffect, forwardRef } from 'react'
 import { useMapStore } from '../stores/mapStore'
 import ConnectionLayer from './ConnectionLayer'
 
@@ -10,7 +10,7 @@ interface DragState {
   currentPos: { x: number, y: number }
 }
 
-const Canvas: React.FC = () => {
+const Canvas = forwardRef<SVGSVGElement>((props, ref) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const [dragState, setDragState] = useState<DragState>({
     componentId: null,
@@ -35,6 +35,9 @@ const Canvas: React.FC = () => {
     completeConnection,
     cancelConnection
   } = useMapStore()
+
+  // Combine refs
+  React.useImperativeHandle(ref, () => svgRef.current!)
 
   // Convert screen coordinates to map coordinates (0-1 scale)
   const screenToMapCoords = useCallback((screenX: number, screenY: number) => {
@@ -455,6 +458,8 @@ const Canvas: React.FC = () => {
       </svg>
     </div>
   )
-}
+})
+
+Canvas.displayName = 'Canvas'
 
 export default Canvas
