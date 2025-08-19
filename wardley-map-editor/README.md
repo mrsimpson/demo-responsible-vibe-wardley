@@ -1,69 +1,91 @@
-# React + TypeScript + Vite
+# Wardley Map Editor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, interactive Wardley Map editor built with React and TypeScript. Create strategic maps with intuitive drag-and-drop functionality and export to multiple formats.
 
-Currently, two official plugins are available:
+## 🚀 Live Demo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**[Try it now!](https://mrsimpson.github.io/demo-responsible-vibe-wardley/)**
 
-## Expanding the ESLint configuration
+## ✨ Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 🎯 **Core Functionality**
+- **Interactive Canvas**: Drag and drop components anywhere on the map
+- **Perfect Coordinate System**: Proper axis alignment with Genesis at (0,0)
+- **Component Management**: Add, edit, and delete map components
+- **Connection System**: Right-click to create dependencies between components
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 📊 **Visual Design**
+- **Evolution Stages**: Genesis → Custom → Product → Commodity
+- **Value Chain Axis**: Visible (top) to Invisible (bottom)
+- **Color-coded Components**: Different colors for different component types
+- **Professional Layout**: Clean, intuitive interface
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### 📤 **Export Options**
+- **PDF Export**: High-quality PDF for presentations
+- **PNG Export**: Image format for documents
+- **Draw.io Export**: Continue editing in Draw.io with pixel-perfect positioning
+- **JSON Export**: Save and share map data
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 🎨 **User Experience**
+- **Simplified Drag-and-Drop**: Reliable, constraint-free component positioning
+- **Real-time Updates**: Immediate visual feedback
+- **Property Panel**: Edit component details and positioning
+- **Responsive Design**: Works on desktop and tablet devices
+
+## 🛠️ Development
+
+### Prerequisites
+- Node.js 20+
+- npm
+
+### Setup
+```bash
+cd wardley-map-editor
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Build
+```bash
+npm run build
 ```
+
+### Deploy
+```bash
+npm run deploy
+```
+
+## 🏗️ Architecture
+
+- **React 19** with TypeScript
+- **Zustand** for state management
+- **Vite** for build tooling
+- **SVG Canvas** for precise positioning
+- **jsPDF** and **html2canvas** for exports
+
+## 📋 Usage
+
+1. **Add Components**: Click component types in the left panel
+2. **Position Components**: Drag components to desired locations
+3. **Create Connections**: Right-click a component, then click another to connect
+4. **Edit Properties**: Select components to edit in the right panel
+5. **Export Maps**: Use the export buttons for PDF, PNG, Draw.io, or JSON
+
+## 🎯 Wardley Mapping Concepts
+
+- **Evolution Axis**: How evolved/commoditized something is (left to right)
+- **Value Chain Axis**: How visible to the user something is (top to bottom)
+- **Components**: The things that make up your system
+- **Dependencies**: How components depend on each other
+
+## 🚀 Deployment
+
+This project automatically deploys to GitHub Pages via GitHub Actions on every push to main.
+
+## 📝 License
+
+MIT License - feel free to use and modify!
+
+---
+
+Built with ❤️ for strategic thinking and Wardley mapping
