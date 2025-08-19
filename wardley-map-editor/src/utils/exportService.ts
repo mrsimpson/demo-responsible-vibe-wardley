@@ -178,7 +178,7 @@ export class ExportService {
 
   // Generate Draw.io XML format
   private static generateDrawIOXML(data: ExportData): string {
-    const components = data.components.map((component, index) => {
+    const components = data.components.map((component) => {
       // Scale to draw.io coordinates with proper centering
       // Web canvas: evolution 0-1 maps to x=0-1000, value chain 0-1 maps to y=50-550
       // Draw.io: we need to map this to the coordinate system with left padding
@@ -200,7 +200,7 @@ export class ExportService {
         </mxCell>`
     }).join('')
 
-    const connections = data.connections.map((connection, index) => {
+    const connections = data.connections.map((connection) => {
       const fromComponent = data.components.find(c => c.id === connection.fromId)
       const toComponent = data.components.find(c => c.id === connection.toId)
       

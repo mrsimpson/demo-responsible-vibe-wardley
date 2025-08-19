@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import Canvas from './components/Canvas'
 import Toolbar from './components/Toolbar'
 import PropertyPanel from './components/PropertyPanel'
@@ -190,7 +190,7 @@ function App() {
       <ExportModal 
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
-        canvasRef={canvasRef}
+        canvasRef={canvasRef as React.RefObject<SVGSVGElement>}
       />
     </div>
   )

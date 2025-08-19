@@ -2,7 +2,7 @@ import React, { useRef, useCallback, forwardRef, useImperativeHandle } from 'rea
 import { useMapStore } from '../stores/mapStore'
 import ConnectionLayer from './ConnectionLayer'
 
-const Canvas = forwardRef<SVGSVGElement>((props, ref) => {
+const Canvas = forwardRef<SVGSVGElement>((_props, ref) => {
   const svgRef = useRef<SVGSVGElement>(null)
   
   const { 
@@ -119,14 +119,6 @@ const Canvas = forwardRef<SVGSVGElement>((props, ref) => {
       cancelConnection()
     }
   }, [isConnecting, startConnection, cancelConnection])
-
-  // Get evolution stage name
-  const getEvolutionStage = (x: number) => {
-    if (x < 0.25) return 'Genesis'
-    if (x < 0.5) return 'Custom'
-    if (x < 0.75) return 'Product'
-    return 'Commodity'
-  }
 
   return (
     <div style={{ flex: 1, overflow: 'hidden', backgroundColor: 'white' }}>
