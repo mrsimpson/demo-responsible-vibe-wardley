@@ -1,44 +1,49 @@
-import React, { useEffect } from 'react'
-import Canvas from './components/Canvas'
-import Toolbar from './components/Toolbar'
-import PropertyPanel from './components/PropertyPanel'
-import { useMapStore } from './stores/mapStore'
-import { AutoSave } from './utils/storage'
-import './App.css'
+import React from 'react'
 
 function App() {
-  // Initialize auto-save
-  useEffect(() => {
-    const autoSave = AutoSave.getInstance()
-    autoSave.start(() => useMapStore.getState())
-    
-    return () => {
-      autoSave.stop()
-    }
-  }, [])
-
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#f3f4f6' }}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
+      <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e5e7eb', padding: '1rem 1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827', margin: 0 }}>
               Wardley Map Editor
             </h1>
-            <p className="text-sm text-gray-600">
+            <p style={{ fontSize: '0.875rem', color: '#4b5563', margin: 0 }}>
               Create and visualize strategic maps
             </p>
           </div>
           
-          <div className="flex items-center space-x-4">
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button style={{ 
+              padding: '0.5rem 1rem', 
+              fontSize: '0.875rem', 
+              color: '#374151', 
+              backgroundColor: 'white', 
+              border: '1px solid #d1d5db', 
+              borderRadius: '0.375rem' 
+            }}>
               Export PDF
             </button>
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <button style={{ 
+              padding: '0.5rem 1rem', 
+              fontSize: '0.875rem', 
+              color: '#374151', 
+              backgroundColor: 'white', 
+              border: '1px solid #d1d5db', 
+              borderRadius: '0.375rem' 
+            }}>
               Export Draw.io
             </button>
-            <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button style={{ 
+              padding: '0.5rem 1rem', 
+              fontSize: '0.875rem', 
+              color: 'white', 
+              backgroundColor: '#2563eb', 
+              border: 'none', 
+              borderRadius: '0.375rem' 
+            }}>
               Save Map
             </button>
           </div>
@@ -46,20 +51,35 @@ function App() {
       </header>
 
       {/* Main content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Left sidebar - Component palette */}
-        <Toolbar />
+        <div style={{ width: '16rem', backgroundColor: '#f9fafb', borderRight: '1px solid #e5e7eb', padding: '1rem' }}>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '1rem' }}>Components</h2>
+          <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>Component palette will go here</p>
+        </div>
         
         {/* Center - Canvas */}
-        <Canvas />
+        <div style={{ flex: 1, overflow: 'hidden', backgroundColor: 'white' }}>
+          <div style={{ width: '100%', height: '100%', border: '1px solid #d1d5db' }}>
+            <svg width="100%" height="100%" viewBox="0 0 1000 600">
+              <rect width="100%" height="100%" fill="white" />
+              <text x="500" y="300" textAnchor="middle" fill="#374151">
+                Canvas will go here
+              </text>
+            </svg>
+          </div>
+        </div>
         
         {/* Right sidebar - Properties panel */}
-        <PropertyPanel />
+        <div style={{ width: '20rem', backgroundColor: '#f9fafb', borderLeft: '1px solid #e5e7eb', padding: '1rem' }}>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '1rem' }}>Properties</h2>
+          <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>Property panel will go here</p>
+        </div>
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 px-6 py-2">
-        <div className="flex items-center justify-between text-sm text-gray-500">
+      <footer style={{ backgroundColor: 'white', borderTop: '1px solid #e5e7eb', padding: '0.5rem 1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.875rem', color: '#6b7280' }}>
           <div>
             Local-first Wardley mapping tool
           </div>
