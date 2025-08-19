@@ -1,14 +1,15 @@
 import React from 'react'
 import { useMapStore } from '../stores/mapStore'
+import ConnectionPropertyPanel from './ConnectionPropertyPanel'
 
 const PropertyPanel: React.FC = () => {
-  const { selectedId, components, updateComponent, deleteComponent } = useMapStore()
+  const { selectedId, selectedConnectionId, components, updateComponent, deleteComponent } = useMapStore()
   
   const selectedComponent = selectedId 
     ? components.find(c => c.id === selectedId)
     : null
 
-  if (!selectedComponent) {
+  if (!selectedComponent && !selectedConnectionId) {
     return (
       <div style={{ 
         width: '20rem', 
@@ -22,10 +23,10 @@ const PropertyPanel: React.FC = () => {
       }}>
         <div style={{ textAlign: 'center', color: '#6b7280' }}>
           <div style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>
-            No component selected
+            No selection
           </div>
           <div style={{ fontSize: '0.875rem' }}>
-            Click on a component to edit its properties
+            Click on a component or connection to edit its properties
           </div>
         </div>
       </div>
@@ -272,6 +273,9 @@ const PropertyPanel: React.FC = () => {
             Delete Component
           </button>
         </div>
+        
+        {/* Connection Properties */}
+        <ConnectionPropertyPanel />
       </div>
     </div>
   )

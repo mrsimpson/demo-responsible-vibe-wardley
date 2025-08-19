@@ -1,5 +1,6 @@
 import React, { useRef, useCallback, useState, useEffect } from 'react'
 import { useMapStore } from '../stores/mapStore'
+import ConnectionLayer from './ConnectionLayer'
 
 interface DragState {
   componentId: string | null
@@ -26,7 +27,13 @@ const Canvas: React.FC = () => {
     updateComponent,
     startDrag,
     endDrag,
-    isDragging: storeIsDragging
+    isDragging: storeIsDragging,
+    // Connection state
+    isConnecting,
+    connectionStart,
+    startConnection,
+    completeConnection,
+    cancelConnection
   } = useMapStore()
 
   // Convert screen coordinates to map coordinates (0-1 scale)
@@ -54,14 +61,24 @@ const Canvas: React.FC = () => {
   // Handle canvas click (deselect components when clicking empty space)
   const handleCanvasClick = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
     if (event.target === svgRef.current && !dragState.isDragging) {
-      selectComponent(null)
+      if (isConnecting) {
+        cancelConnection()
+      } else {
+        selectComponent(null)
+      }
     }
-  }, [selectComponent, dragState.isDragging])
+  }, [selectComponent, dragState.isDragging, isConnecting, cancelConnection])
 
-  // Handle component mouse down (start drag)
+  // Handle component mouse down (start drag or connection)
   const handleComponentMouseDown = useCallback((event: React.MouseEvent, componentId: string) => {
     event.stopPropagation()
     event.preventDefault()
+    
+    // If we're in connection mode, complete the connection
+    if (isConnecting && connectionStart) {
+      completeConnection(componentId)
+      return
+    }
     
     const component = components.find(c => c.id === componentId)
     if (!component) return
@@ -87,7 +104,19 @@ const Canvas: React.FC = () => {
     // Add global mouse event listeners
     document.addEventListener('mousemove', handleGlobalMouseMove)
     document.addEventListener('mouseup', handleGlobalMouseUp)
-  }, [components, screenToMapCoords, mapToSVGCoords, startDrag, selectComponent])
+  }, [components, screenToMapCoords, mapToSVGCoords, startDrag, selectComponent, isConnecting, connectionStart, completeConnection])
+
+  // Handle component right-click (start connection)
+  const handleComponentRightClick = useCallback((event: React.MouseEvent, componentId: string) => {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    if (!isConnecting) {
+      startConnection(componentId)
+    } else {
+      cancelConnection()
+    }
+  }, [isConnecting, startConnection, cancelConnection])
 
   // Global mouse move handler
   const handleGlobalMouseMove = useCallback((event: MouseEvent) => {
@@ -244,10 +273,15 @@ const Canvas: React.FC = () => {
           </text>
         </g>
 
+        {/* Connections (drawn behind components) */}
+        <ConnectionLayer mapToSVGCoords={mapToSVGCoords} />
+
         {/* Components */}
         {components.map(component => {
           const isSelected = component.id === selectedId
           const isDraggingThis = dragState.isDragging && dragState.componentId === component.id
+          const isConnectionStart = connectionStart === component.id
+          const isConnectionTarget = isConnecting && connectionStart !== component.id
           
           // Use drag position if dragging, otherwise use component position
           const svgCoords = isDraggingThis 
@@ -260,17 +294,22 @@ const Canvas: React.FC = () => {
               <circle
                 cx={svgCoords.x}
                 cy={svgCoords.y}
-                r={isDraggingThis ? "28" : "25"}
+                r={isDraggingThis ? "28" : (isConnectionStart ? "30" : "25")}
                 fill={component.color}
-                stroke={isSelected ? '#3B82F6' : '#374151'}
-                strokeWidth={isSelected ? 3 : 2}
+                stroke={
+                  isConnectionStart ? '#F59E0B' : 
+                  isConnectionTarget ? '#10B981' :
+                  isSelected ? '#3B82F6' : '#374151'
+                }
+                strokeWidth={isSelected || isConnectionStart ? 3 : 2}
                 style={{ 
-                  cursor: isDraggingThis ? 'grabbing' : 'grab',
-                  opacity: isDraggingThis ? 0.8 : 1,
+                  cursor: isConnecting ? 'crosshair' : (isDraggingThis ? 'grabbing' : 'grab'),
+                  opacity: isDraggingThis ? 0.8 : (isConnectionTarget ? 0.9 : 1),
                   filter: isDraggingThis ? 'url(#dropShadow)' : 'none',
                   transition: isDraggingThis ? 'none' : 'all 0.2s ease'
                 }}
                 onMouseDown={(e) => handleComponentMouseDown(e, component.id)}
+                onContextMenu={(e) => handleComponentRightClick(e, component.id)}
               />
               
               {/* Component label */}
@@ -291,7 +330,7 @@ const Canvas: React.FC = () => {
               </text>
               
               {/* Selection indicator */}
-              {isSelected && !isDraggingThis && (
+              {isSelected && !isDraggingThis && !isConnectionStart && (
                 <circle
                   cx={svgCoords.x}
                   cy={svgCoords.y}
@@ -312,6 +351,44 @@ const Canvas: React.FC = () => {
                     repeatCount="indefinite"
                   />
                 </circle>
+              )}
+              
+              {/* Connection start indicator */}
+              {isConnectionStart && (
+                <circle
+                  cx={svgCoords.x}
+                  cy={svgCoords.y}
+                  r="35"
+                  fill="none"
+                  stroke="#F59E0B"
+                  strokeWidth="3"
+                  strokeDasharray="8,4"
+                  style={{ pointerEvents: 'none' }}
+                >
+                  <animateTransform
+                    attributeName="transform"
+                    attributeType="XML"
+                    type="rotate"
+                    from={`0 ${svgCoords.x} ${svgCoords.y}`}
+                    to={`360 ${svgCoords.x} ${svgCoords.y}`}
+                    dur="1.5s"
+                    repeatCount="indefinite"
+                  />
+                </circle>
+              )}
+              
+              {/* Connection target indicator */}
+              {isConnectionTarget && (
+                <circle
+                  cx={svgCoords.x}
+                  cy={svgCoords.y}
+                  r="32"
+                  fill="none"
+                  stroke="#10B981"
+                  strokeWidth="2"
+                  strokeDasharray="4,4"
+                  style={{ pointerEvents: 'none' }}
+                />
               )}
               
               {/* Drag position indicator */}
@@ -346,6 +423,33 @@ const Canvas: React.FC = () => {
         {components.length === 0 && (
           <text x="500" y="300" textAnchor="middle" fill="#6b7280" fontSize="16">
             Add components from the left panel to start creating your Wardley map
+          </text>
+        )}
+        
+        {/* Connection mode instructions */}
+        {isConnecting && (
+          <g>
+            <rect
+              x="350"
+              y="20"
+              width="300"
+              height="60"
+              fill="rgba(245, 158, 11, 0.9)"
+              rx="8"
+            />
+            <text x="500" y="40" textAnchor="middle" fill="white" fontSize="14" fontWeight="600">
+              Connection Mode Active
+            </text>
+            <text x="500" y="58" textAnchor="middle" fill="white" fontSize="12">
+              Click another component to connect, or click empty space to cancel
+            </text>
+          </g>
+        )}
+        
+        {/* Help text */}
+        {components.length > 0 && !isConnecting && (
+          <text x="500" y="25" textAnchor="middle" fill="#9ca3af" fontSize="12">
+            Right-click a component to start connecting • Double-click connections to delete
           </text>
         )}
       </svg>

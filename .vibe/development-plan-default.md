@@ -197,23 +197,27 @@ Build a web-based Wardley map editor that allows users to create, edit, and visu
 - [x] **Phase 3 Complete**: SVG Canvas with proper Wardley map axes and visual enhancements
 - [x] **Phase 4 Complete**: Interactive component management with drag-and-drop
 - [x] **Phase 5 Complete**: Enhanced drag-and-drop with professional visual feedback
-- [x] **Enhanced Canvas Features**: 
-  - Colored evolution stage backgrounds (Genesis=yellow, Custom=purple, Product=green, Commodity=red)
-  - Grid lines and visual reference system
-  - Animated selection indicators with rotating dashed circles
-  - Drop shadows and visual feedback during drag operations
-  - Real-time evolution stage display during drag
-  - Global mouse event handling for smooth drag experience
-  - Component scaling and opacity changes during drag
-  - Professional visual polish with proper coordinate mapping
+- [x] **Phase 6 Complete**: Connection Arrows - Full dependency mapping system
+- [x] **Connection Features Implemented**:
+  - Right-click components to start connection mode
+  - Click target component to complete connection
+  - Visual connection indicators (orange for start, green for targets)
+  - Connection rendering with proper SVG arrows
+  - Connection selection and editing (click connections)
+  - Connection property panel (type: dependency/flow, style: solid/dashed, labels)
+  - Connection deletion (double-click or property panel)
+  - Connection state management in Zustand store
+  - Visual feedback during connection creation
+  - Animated selection indicators for connections
 
 ### Current Status
-✅ **Fully Functional Wardley Map Editor** on http://localhost:5175/  
-✅ **Enhanced Drag-and-Drop** with smooth visual feedback  
+✅ **Complete Wardley Map Editor** on http://localhost:5175/  
+✅ **Full Connection System** with dependency arrows  
 ✅ **Professional Visual Design** with colored evolution stages  
-✅ **Interactive Components** with selection, editing, and positioning  
-✅ **Real-time Property Updates** with evolution stage detection  
-🎯 **Ready for Connection Arrows** - next logical enhancement
+✅ **Interactive Components** with drag-and-drop and connections  
+✅ **Connection Management** with editing and deletion  
+✅ **Real-time Visual Feedback** for all interactions  
+🎯 **Ready for Export Features** - PDF, draw.io, and PNG export capabilities
 
 ## Code
 

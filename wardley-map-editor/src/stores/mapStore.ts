@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-// Simplified interfaces for now
+// Core interfaces
 export interface MapComponent {
   id: string
   name: string
@@ -10,10 +10,23 @@ export interface MapComponent {
   notes?: string
 }
 
+export interface MapConnection {
+  id: string
+  fromId: string
+  toId: string
+  type: 'dependency' | 'flow'
+  style?: 'solid' | 'dashed'
+  label?: string
+}
+
 export interface MapState {
   components: MapComponent[]
+  connections: MapConnection[]
   selectedId: string | null
+  selectedConnectionId: string | null
   isDragging: boolean
+  isConnecting: boolean
+  connectionStart: string | null // Component ID for connection start
 }
 
 // Generate unique IDs
@@ -26,6 +39,17 @@ interface MapStore extends MapState {
   deleteComponent: (id: string) => void
   selectComponent: (id: string | null) => void
   
+  // Connection actions
+  addConnection: (connection: Omit<MapConnection, 'id'>) => void
+  updateConnection: (id: string, updates: Partial<MapConnection>) => void
+  deleteConnection: (id: string) => void
+  selectConnection: (id: string | null) => void
+  
+  // Connection creation workflow
+  startConnection: (componentId: string) => void
+  completeConnection: (toComponentId: string) => void
+  cancelConnection: () => void
+  
   // Drag actions
   startDrag: (componentId: string) => void
   updateDrag: (id: string, x: number, y: number) => void
@@ -33,15 +57,22 @@ interface MapStore extends MapState {
   
   // Utility
   clearMap: () => void
+  getComponentById: (id: string) => MapComponent | undefined
+  getConnectionById: (id: string) => MapConnection | undefined
+  getConnectionsForComponent: (componentId: string) => MapConnection[]
 }
 
 export const useMapStore = create<MapStore>((set, get) => ({
   // Initial state
   components: [],
+  connections: [],
   selectedId: null,
+  selectedConnectionId: null,
   isDragging: false,
+  isConnecting: false,
+  connectionStart: null,
   
-  // Actions
+  // Component actions
   addComponent: (componentData) => {
     const component: MapComponent = {
       ...componentData,
@@ -50,7 +81,8 @@ export const useMapStore = create<MapStore>((set, get) => ({
     
     set((state) => ({
       components: [...state.components, component],
-      selectedId: component.id
+      selectedId: component.id,
+      selectedConnectionId: null
     }))
   },
   
@@ -65,18 +97,103 @@ export const useMapStore = create<MapStore>((set, get) => ({
   deleteComponent: (id) => {
     set((state) => ({
       components: state.components.filter(component => component.id !== id),
-      selectedId: state.selectedId === id ? null : state.selectedId
+      connections: state.connections.filter(
+        connection => connection.fromId !== id && connection.toId !== id
+      ),
+      selectedId: state.selectedId === id ? null : state.selectedId,
+      selectedConnectionId: null
     }))
   },
   
   selectComponent: (id) => {
-    set({ selectedId: id })
+    set({ 
+      selectedId: id, 
+      selectedConnectionId: null,
+      isConnecting: false,
+      connectionStart: null
+    })
   },
   
+  // Connection actions
+  addConnection: (connectionData) => {
+    const connection: MapConnection = {
+      ...connectionData,
+      id: generateId()
+    }
+    
+    set((state) => ({
+      connections: [...state.connections, connection],
+      selectedConnectionId: connection.id,
+      selectedId: null
+    }))
+  },
+  
+  updateConnection: (id, updates) => {
+    set((state) => ({
+      connections: state.connections.map(connection =>
+        connection.id === id ? { ...connection, ...updates } : connection
+      )
+    }))
+  },
+  
+  deleteConnection: (id) => {
+    set((state) => ({
+      connections: state.connections.filter(connection => connection.id !== id),
+      selectedConnectionId: state.selectedConnectionId === id ? null : state.selectedConnectionId
+    }))
+  },
+  
+  selectConnection: (id) => {
+    set({ 
+      selectedConnectionId: id, 
+      selectedId: null,
+      isConnecting: false,
+      connectionStart: null
+    })
+  },
+  
+  // Connection creation workflow
+  startConnection: (componentId) => {
+    set({
+      isConnecting: true,
+      connectionStart: componentId,
+      selectedId: null,
+      selectedConnectionId: null
+    })
+  },
+  
+  completeConnection: (toComponentId) => {
+    const { connectionStart } = get()
+    if (connectionStart && connectionStart !== toComponentId) {
+      get().addConnection({
+        fromId: connectionStart,
+        toId: toComponentId,
+        type: 'dependency',
+        style: 'solid'
+      })
+    }
+    
+    set({
+      isConnecting: false,
+      connectionStart: null
+    })
+  },
+  
+  cancelConnection: () => {
+    set({
+      isConnecting: false,
+      connectionStart: null
+    })
+  },
+  
+  // Drag actions
   startDrag: (componentId) => {
     set({
       isDragging: true,
-      selectedId: componentId
+      selectedId: componentId,
+      selectedConnectionId: null,
+      isConnecting: false,
+      connectionStart: null
     })
   },
   
@@ -92,11 +209,30 @@ export const useMapStore = create<MapStore>((set, get) => ({
     set({ isDragging: false })
   },
   
+  // Utility actions
   clearMap: () => {
     set({
       components: [],
+      connections: [],
       selectedId: null,
-      isDragging: false
+      selectedConnectionId: null,
+      isDragging: false,
+      isConnecting: false,
+      connectionStart: null
     })
+  },
+  
+  getComponentById: (id) => {
+    return get().components.find(component => component.id === id)
+  },
+  
+  getConnectionById: (id) => {
+    return get().connections.find(connection => connection.id === id)
+  },
+  
+  getConnectionsForComponent: (componentId) => {
+    return get().connections.filter(
+      connection => connection.fromId === componentId || connection.toId === componentId
+    )
   }
 }))
