@@ -1,4 +1,7 @@
 import React from 'react'
+import Canvas from './components/Canvas'
+import Toolbar from './components/Toolbar'
+import PropertyPanel from './components/PropertyPanel'
 
 function App() {
   return (
@@ -22,7 +25,8 @@ function App() {
               color: '#374151', 
               backgroundColor: 'white', 
               border: '1px solid #d1d5db', 
-              borderRadius: '0.375rem' 
+              borderRadius: '0.375rem',
+              cursor: 'pointer'
             }}>
               Export PDF
             </button>
@@ -32,7 +36,8 @@ function App() {
               color: '#374151', 
               backgroundColor: 'white', 
               border: '1px solid #d1d5db', 
-              borderRadius: '0.375rem' 
+              borderRadius: '0.375rem',
+              cursor: 'pointer'
             }}>
               Export Draw.io
             </button>
@@ -42,7 +47,8 @@ function App() {
               color: 'white', 
               backgroundColor: '#2563eb', 
               border: 'none', 
-              borderRadius: '0.375rem' 
+              borderRadius: '0.375rem',
+              cursor: 'pointer'
             }}>
               Save Map
             </button>
@@ -53,28 +59,13 @@ function App() {
       {/* Main content */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Left sidebar - Component palette */}
-        <div style={{ width: '16rem', backgroundColor: '#f9fafb', borderRight: '1px solid #e5e7eb', padding: '1rem' }}>
-          <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '1rem' }}>Components</h2>
-          <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>Component palette will go here</p>
-        </div>
+        <Toolbar />
         
         {/* Center - Canvas */}
-        <div style={{ flex: 1, overflow: 'hidden', backgroundColor: 'white' }}>
-          <div style={{ width: '100%', height: '100%', border: '1px solid #d1d5db' }}>
-            <svg width="100%" height="100%" viewBox="0 0 1000 600">
-              <rect width="100%" height="100%" fill="white" />
-              <text x="500" y="300" textAnchor="middle" fill="#374151">
-                Canvas will go here
-              </text>
-            </svg>
-          </div>
-        </div>
+        <Canvas />
         
         {/* Right sidebar - Properties panel */}
-        <div style={{ width: '20rem', backgroundColor: '#f9fafb', borderLeft: '1px solid #e5e7eb', padding: '1rem' }}>
-          <h2 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '1rem' }}>Properties</h2>
-          <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>Property panel will go here</p>
-        </div>
+        <PropertyPanel />
       </div>
 
       {/* Footer */}
@@ -84,7 +75,7 @@ function App() {
             Local-first Wardley mapping tool
           </div>
           <div>
-            Auto-save enabled
+            Interactive components ready
           </div>
         </div>
       </footer>
