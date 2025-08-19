@@ -1,11 +1,22 @@
-import React, { useRef, useCallback, useState } from 'react'
+import React, { useRef, useCallback, useState, useEffect } from 'react'
 import { useMapStore } from '../stores/mapStore'
+
+interface DragState {
+  componentId: string | null
+  isDragging: boolean
+  startPos: { x: number, y: number }
+  offset: { x: number, y: number }
+  currentPos: { x: number, y: number }
+}
 
 const Canvas: React.FC = () => {
   const svgRef = useRef<SVGSVGElement>(null)
-  const [dragState, setDragState] = useState<{ componentId: string | null, offset: { x: number, y: number } }>({
+  const [dragState, setDragState] = useState<DragState>({
     componentId: null,
-    offset: { x: 0, y: 0 }
+    isDragging: false,
+    startPos: { x: 0, y: 0 },
+    offset: { x: 0, y: 0 },
+    currentPos: { x: 0, y: 0 }
   })
   
   const { 
@@ -15,7 +26,7 @@ const Canvas: React.FC = () => {
     updateComponent,
     startDrag,
     endDrag,
-    isDragging 
+    isDragging: storeIsDragging
   } = useMapStore()
 
   // Convert screen coordinates to map coordinates (0-1 scale)
@@ -24,7 +35,7 @@ const Canvas: React.FC = () => {
     
     const rect = svgRef.current.getBoundingClientRect()
     const x = (screenX - rect.left) / rect.width
-    const y = (screenY - rect.top) / rect.height
+    const y = (screenY - rect.top - 50) / 500 // Account for axis offset and canvas height
     
     return {
       x: Math.max(0, Math.min(1, x)),
@@ -32,52 +43,107 @@ const Canvas: React.FC = () => {
     }
   }, [])
 
+  // Convert map coordinates to SVG coordinates
+  const mapToSVGCoords = useCallback((mapX: number, mapY: number) => {
+    return {
+      x: mapX * 1000,
+      y: mapY * 500 + 50 // Account for axis offset
+    }
+  }, [])
+
   // Handle canvas click (deselect components when clicking empty space)
   const handleCanvasClick = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
-    if (event.target === svgRef.current && !isDragging) {
+    if (event.target === svgRef.current && !dragState.isDragging) {
       selectComponent(null)
     }
-  }, [selectComponent, isDragging])
+  }, [selectComponent, dragState.isDragging])
 
   // Handle component mouse down (start drag)
   const handleComponentMouseDown = useCallback((event: React.MouseEvent, componentId: string) => {
     event.stopPropagation()
-    const coords = screenToMapCoords(event.clientX, event.clientY)
-    const component = components.find(c => c.id === componentId)
+    event.preventDefault()
     
-    if (component) {
-      const offset = {
-        x: coords.x - component.x,
-        y: coords.y - component.y
-      }
-      
-      setDragState({ componentId, offset })
-      startDrag(componentId)
-      selectComponent(componentId)
-    }
-  }, [components, screenToMapCoords, startDrag, selectComponent])
+    const component = components.find(c => c.id === componentId)
+    if (!component) return
 
-  // Handle mouse move (drag component)
-  const handleMouseMove = useCallback((event: React.MouseEvent<SVGSVGElement>) => {
-    if (isDragging && dragState.componentId) {
-      const coords = screenToMapCoords(event.clientX, event.clientY)
-      const newX = coords.x - dragState.offset.x
-      const newY = coords.y - dragState.offset.y
-      
-      updateComponent(dragState.componentId, { 
-        x: Math.max(0, Math.min(1, newX)), 
-        y: Math.max(0, Math.min(1, newY)) 
+    const screenCoords = screenToMapCoords(event.clientX, event.clientY)
+    const svgCoords = mapToSVGCoords(component.x, component.y)
+    
+    const newDragState: DragState = {
+      componentId,
+      isDragging: true,
+      startPos: { x: event.clientX, y: event.clientY },
+      offset: {
+        x: screenCoords.x - component.x,
+        y: screenCoords.y - component.y
+      },
+      currentPos: { x: svgCoords.x, y: svgCoords.y }
+    }
+    
+    setDragState(newDragState)
+    startDrag(componentId)
+    selectComponent(componentId)
+    
+    // Add global mouse event listeners
+    document.addEventListener('mousemove', handleGlobalMouseMove)
+    document.addEventListener('mouseup', handleGlobalMouseUp)
+  }, [components, screenToMapCoords, mapToSVGCoords, startDrag, selectComponent])
+
+  // Global mouse move handler
+  const handleGlobalMouseMove = useCallback((event: MouseEvent) => {
+    if (!dragState.isDragging || !dragState.componentId) return
+    
+    const mapCoords = screenToMapCoords(event.clientX, event.clientY)
+    const constrainedCoords = {
+      x: Math.max(0, Math.min(1, mapCoords.x - dragState.offset.x)),
+      y: Math.max(0, Math.min(1, mapCoords.y - dragState.offset.y))
+    }
+    
+    const svgCoords = mapToSVGCoords(constrainedCoords.x, constrainedCoords.y)
+    
+    // Update drag state for visual feedback
+    setDragState(prev => ({
+      ...prev,
+      currentPos: svgCoords
+    }))
+    
+    // Update component position in store
+    updateComponent(dragState.componentId, constrainedCoords)
+  }, [dragState, screenToMapCoords, mapToSVGCoords, updateComponent])
+
+  // Global mouse up handler
+  const handleGlobalMouseUp = useCallback(() => {
+    if (dragState.isDragging) {
+      setDragState({
+        componentId: null,
+        isDragging: false,
+        startPos: { x: 0, y: 0 },
+        offset: { x: 0, y: 0 },
+        currentPos: { x: 0, y: 0 }
       })
-    }
-  }, [isDragging, dragState, screenToMapCoords, updateComponent])
-
-  // Handle mouse up (end drag)
-  const handleMouseUp = useCallback(() => {
-    if (isDragging) {
       endDrag()
-      setDragState({ componentId: null, offset: { x: 0, y: 0 } })
+      
+      // Remove global event listeners
+      document.removeEventListener('mousemove', handleGlobalMouseMove)
+      document.removeEventListener('mouseup', handleGlobalMouseUp)
     }
-  }, [isDragging, endDrag])
+  }, [dragState.isDragging, endDrag, handleGlobalMouseMove])
+
+  // Cleanup event listeners on unmount
+  useEffect(() => {
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove)
+      document.removeEventListener('mouseup', handleGlobalMouseUp)
+    }
+  }, [handleGlobalMouseMove, handleGlobalMouseUp])
+
+  // Get evolution stage name for display
+  const getEvolutionStage = (x: number) => {
+    if (x < 0.25) return 'Genesis'
+    if (x < 0.5) return 'Custom'
+    if (x < 0.75) return 'Product'
+    return 'Commodity'
+  }
 
   return (
     <div style={{ flex: 1, overflow: 'hidden', backgroundColor: 'white' }}>
@@ -86,11 +152,12 @@ const Canvas: React.FC = () => {
         width="100%"
         height="100%"
         viewBox="0 0 1000 600"
-        style={{ border: '1px solid #d1d5db', cursor: isDragging ? 'grabbing' : 'default' }}
+        style={{ 
+          border: '1px solid #d1d5db', 
+          cursor: dragState.isDragging ? 'grabbing' : 'default',
+          userSelect: 'none'
+        }}
         onClick={handleCanvasClick}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
       >
         {/* Background grid */}
         <defs>
@@ -107,11 +174,22 @@ const Canvas: React.FC = () => {
               strokeWidth="1"
             />
           </pattern>
+          
+          {/* Drop shadow filter for dragging components */}
+          <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="2" dy="4" stdDeviation="3" floodOpacity="0.3"/>
+          </filter>
         </defs>
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         {/* Evolution Axis */}
         <g>
+          {/* Stage backgrounds */}
+          <rect x="0" y="50" width="250" height="500" fill="#fef3c7" opacity="0.2" />
+          <rect x="250" y="50" width="250" height="500" fill="#ddd6fe" opacity="0.2" />
+          <rect x="500" y="50" width="250" height="500" fill="#dcfce7" opacity="0.2" />
+          <rect x="750" y="50" width="250" height="500" fill="#fee2e2" opacity="0.2" />
+          
           {/* Main axis line */}
           <line x1="0" y1="550" x2="1000" y2="550" stroke="#374151" strokeWidth="2" />
           
@@ -145,6 +223,13 @@ const Canvas: React.FC = () => {
           {/* Main axis line */}
           <line x1="50" y1="50" x2="50" y2="550" stroke="#374151" strokeWidth="2" />
           
+          {/* Grid lines */}
+          <line x1="50" y1="50" x2="1000" y2="50" stroke="#e5e7eb" strokeWidth="1" opacity="0.5" />
+          <line x1="50" y1="175" x2="1000" y2="175" stroke="#e5e7eb" strokeWidth="1" opacity="0.3" />
+          <line x1="50" y1="300" x2="1000" y2="300" stroke="#e5e7eb" strokeWidth="1" opacity="0.3" />
+          <line x1="50" y1="425" x2="1000" y2="425" stroke="#e5e7eb" strokeWidth="1" opacity="0.3" />
+          <line x1="50" y1="550" x2="1000" y2="550" stroke="#e5e7eb" strokeWidth="1" opacity="0.5" />
+          
           {/* Labels */}
           <text x="35" y="55" textAnchor="end" fill="#374151" fontSize="14" fontWeight="500">
             Visible
@@ -162,52 +247,96 @@ const Canvas: React.FC = () => {
         {/* Components */}
         {components.map(component => {
           const isSelected = component.id === selectedId
-          const x = component.x * 1000
-          const y = component.y * 500 + 50 // Offset for axis space
+          const isDraggingThis = dragState.isDragging && dragState.componentId === component.id
+          
+          // Use drag position if dragging, otherwise use component position
+          const svgCoords = isDraggingThis 
+            ? dragState.currentPos
+            : mapToSVGCoords(component.x, component.y)
           
           return (
             <g key={component.id}>
               {/* Component circle */}
               <circle
-                cx={x}
-                cy={y}
-                r="25"
+                cx={svgCoords.x}
+                cy={svgCoords.y}
+                r={isDraggingThis ? "28" : "25"}
                 fill={component.color}
                 stroke={isSelected ? '#3B82F6' : '#374151'}
                 strokeWidth={isSelected ? 3 : 2}
                 style={{ 
-                  cursor: 'grab',
-                  opacity: isDragging && dragState.componentId === component.id ? 0.7 : 1,
-                  transition: isDragging ? 'none' : 'all 0.2s ease'
+                  cursor: isDraggingThis ? 'grabbing' : 'grab',
+                  opacity: isDraggingThis ? 0.8 : 1,
+                  filter: isDraggingThis ? 'url(#dropShadow)' : 'none',
+                  transition: isDraggingThis ? 'none' : 'all 0.2s ease'
                 }}
                 onMouseDown={(e) => handleComponentMouseDown(e, component.id)}
               />
               
               {/* Component label */}
               <text
-                x={x}
-                y={y + 5}
+                x={svgCoords.x}
+                y={svgCoords.y + 5}
                 textAnchor="middle"
                 fill="white"
-                fontSize="12"
+                fontSize={isDraggingThis ? "13" : "12"}
                 fontWeight="600"
-                style={{ pointerEvents: 'none', userSelect: 'none' }}
+                style={{ 
+                  pointerEvents: 'none', 
+                  userSelect: 'none',
+                  filter: isDraggingThis ? 'url(#dropShadow)' : 'none'
+                }}
               >
                 {component.name}
               </text>
               
               {/* Selection indicator */}
-              {isSelected && (
+              {isSelected && !isDraggingThis && (
                 <circle
-                  cx={x}
-                  cy={y}
+                  cx={svgCoords.x}
+                  cy={svgCoords.y}
                   r="30"
                   fill="none"
                   stroke="#3B82F6"
                   strokeWidth="2"
                   strokeDasharray="5,5"
                   style={{ pointerEvents: 'none' }}
-                />
+                >
+                  <animateTransform
+                    attributeName="transform"
+                    attributeType="XML"
+                    type="rotate"
+                    from={`0 ${svgCoords.x} ${svgCoords.y}`}
+                    to={`360 ${svgCoords.x} ${svgCoords.y}`}
+                    dur="3s"
+                    repeatCount="indefinite"
+                  />
+                </circle>
+              )}
+              
+              {/* Drag position indicator */}
+              {isDraggingThis && (
+                <g>
+                  {/* Position info */}
+                  <rect
+                    x={svgCoords.x - 40}
+                    y={svgCoords.y - 50}
+                    width="80"
+                    height="20"
+                    fill="rgba(0,0,0,0.8)"
+                    rx="4"
+                  />
+                  <text
+                    x={svgCoords.x}
+                    y={svgCoords.y - 37}
+                    textAnchor="middle"
+                    fill="white"
+                    fontSize="10"
+                    fontWeight="500"
+                  >
+                    {getEvolutionStage(component.x)}
+                  </text>
+                </g>
               )}
             </g>
           )
