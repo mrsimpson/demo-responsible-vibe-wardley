@@ -1,6 +1,7 @@
 import React, { useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
 import { useMapStore } from '../stores/mapStore'
 import ConnectionLayer from './ConnectionLayer'
+import { getBubbleDimensions } from '../utils/textUtils'
 
 const Canvas = forwardRef<SVGSVGElement>((_props, ref) => {
   const svgRef = useRef<SVGSVGElement>(null)
@@ -229,14 +230,16 @@ const Canvas = forwardRef<SVGSVGElement>((_props, ref) => {
           const isConnectionTarget = isConnecting && connectionStart !== component.id
           
           const svgCoords = mapToSVGCoords(component.x, component.y)
+          const bubbleDimensions = getBubbleDimensions(component.name)
           
           return (
             <g key={component.id}>
-              {/* Component circle */}
-              <circle
+              {/* Component ellipse */}
+              <ellipse
                 cx={svgCoords.x}
                 cy={svgCoords.y}
-                r="25"
+                rx={bubbleDimensions.rx}
+                ry={bubbleDimensions.ry}
                 fill={component.color}
                 stroke={
                   isConnectionStart ? '#F59E0B' : 
@@ -270,10 +273,11 @@ const Canvas = forwardRef<SVGSVGElement>((_props, ref) => {
               
               {/* Simple selection indicator - no animation */}
               {isSelected && !isConnectionStart && (
-                <circle
+                <ellipse
                   cx={svgCoords.x}
                   cy={svgCoords.y}
-                  r="30"
+                  rx={bubbleDimensions.rx + 5}
+                  ry={bubbleDimensions.ry + 5}
                   fill="none"
                   stroke="#3B82F6"
                   strokeWidth="2"
@@ -284,10 +288,11 @@ const Canvas = forwardRef<SVGSVGElement>((_props, ref) => {
               
               {/* Connection start indicator */}
               {isConnectionStart && (
-                <circle
+                <ellipse
                   cx={svgCoords.x}
                   cy={svgCoords.y}
-                  r="35"
+                  rx={bubbleDimensions.rx + 10}
+                  ry={bubbleDimensions.ry + 10}
                   fill="none"
                   stroke="#F59E0B"
                   strokeWidth="3"
@@ -298,10 +303,11 @@ const Canvas = forwardRef<SVGSVGElement>((_props, ref) => {
               
               {/* Connection target indicator */}
               {isConnectionTarget && (
-                <circle
+                <ellipse
                   cx={svgCoords.x}
                   cy={svgCoords.y}
-                  r="32"
+                  rx={bubbleDimensions.rx + 7}
+                  ry={bubbleDimensions.ry + 7}
                   fill="none"
                   stroke="#10B981"
                   strokeWidth="2"
